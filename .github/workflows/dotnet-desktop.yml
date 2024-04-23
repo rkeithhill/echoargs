@@ -1,0 +1,50 @@
+name: echoargs build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    # For a list of available runner types, refer to
+    # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+    runs-on: windows-latest, ubuntu-20.04, macos-12  
+                             
+    env:
+      Project_Name: echoargs.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    # Install the .NET workload
+    - name: Install .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    # Display .NET version
+    - name: Display dotnet version
+      run: dotnet --version        
+      env:
+        Configuration: ${{ matrix.configuration }}
+        
+    # Restore
+    - name: Install dependencies
+      run: dotnet restore $env:Project_Name
+      env:
+        Configuration: ${{ matrix.configuration }}
+               
+    # Build 
+    - name: Publish
+      run: dotnet publish $env:Project_Name -c $env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
